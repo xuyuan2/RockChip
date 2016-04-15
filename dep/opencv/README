@@ -1,0 +1,83 @@
+Below are instructions of compiling OpenCV with QT.
+The OpenCV branch used is f77926675f4c0aea39292a2f13f4850a15dec2e0
+
+---------------------------------------------------------------------------------------------------------------------------
+MAC:
+
+1. Install QT:
+brew install qt
+
+2. Change RPATH settings in CMakeList.txt, OpenCV root folder:
+
+#if(APPLE)
+    set(CMAKE_MACOSX_RPATH ON)
+    set(CMAKE_SKIP_BUILD_RPATH FALSE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+#    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+#    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+    list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}" isSystemDir)
+    if("${isSystemDir}" STREQUAL "-1")
+        set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}")
+    endif()
+# endif()
+
+3. Run cmake-gui
+
+4. Check out "with QT"
+
+5. Run otool -L on the generated libs, make sure the dependency starts with @rpath
+
+---------------------------------------------------------------------------------------------------------------------------
+
+WIN:
+
+1. Download QT sources qt-everywhere-opensource-src-4.8.6.zip from http://download.qt.io/archive/qt/4.8/4.8.6
+
+2. From VS command prompt run the following in QT root folder:
+configure -fast -opensource -confirm-license -release -no-webkit -no-phonon -no-phonon-backend -no-script -no-scripttools
+
+3. nmake
+
+4. Cmake-gui for OpenCV with QT option
+
+---------------------------------------------------------------------------------------------------------------------------
+
+Android:
+1. Create a folder build-android
+
+2. Run a script having the following text:
+rm CMakeCache.txt CMakeFiles -rf
+cmake -DCMAKE_TOOLCHAIN_FILE=../platforms/android/android.toolchain.cmake -DANDROID_STANDALONE_TOOLCHAIN=/home/dimar/dev/camera/dep/android/toolchain/arm-linux-androideabi-r10d_api18 -DANDROID_ABI="armeabi-v7a with NEON" -DBUILD_SHARED_LIBS=ON -DANDROID_STL=gnustl_shared ..
+
+3. make
+
+---------------------------------------------------------------------------------------------------------------------------
+
+LX:
+1. Install QT4 libs:
+sudo apt-get install qt4-dev-tools
+
+2. Generate a project with cmake-gui and compile
+
+---------------------------------------------------------------------------------------------------------------------------
+
+Android64 (LX):
+1. Create a folder build-android64
+
+2. Force zlib compilation by modifying CMakeList.txt in the root folder:
+#OCV_OPTION(BUILD_ZLIB               "Build zlib from source"             WIN32 OR APPLE ) // comment this line
+OCV_OPTION(BUILD_ZLIB               "Build zlib from source"             ON ) // add this line
+
+3. Add into the same CMakeList.txt:
+add_definitions(-std=c++11)
+
+4. Run a script having the following text:
+rm CMakeCache.txt CMakeFiles -rf
+cmake -DCMAKE_TOOLCHAIN_FILE=../platforms/android/android.toolchain.cmake -DANDROID_STANDALONE_TOOLCHAIN=/home/dimar/camera/dep/android/toolchain/arm64-linux-r10e-api21 -DANDROID_ABI="arm64-v8a" -DBUILD_SHARED_LIBS=ON -DANDROID_STL=gnustl_shared ..
+
+5. make
